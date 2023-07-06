@@ -1,0 +1,814 @@
+Password controller
+
+
+const asyncHandler = require("express-async-handler");
+const User = require('../models/user');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
+//pmjpmxuwqwnbfqsa
+module.exports.forgot_post = async (req, res) => {
+  const { email } = req.body;
+  try {
+    //chercher dans la base de données est ce que l'email existe ou pas
+    if (email) {
+      const isUser = await User.findOne({ email: email })
+      //il existe deja
+      if (isUser) {
+        //creation du token
+        const secretKey = isUser._id + 'net ninja secret ';
+        const token = jwt.sign({ userID: isUser._id }, secretKey, { expiresIn: "500m" });
+        const link = `http://localhost:3000/user/reset-password/${isUser._id}/${token}`;
+        const transport = nodemailer.createTransport({
+          service: "gmail",
+          host: "smtp.gmail.com",
+          auth: {
+            user:"eastremtesting17@gmail.com",//"estreamplateform@gmail.com",//
+            pass: "dnozzgkbvcvgirjr"///"lupnouesznbbwpus"
+            //user: process.env.EMAIL,
+            //pass: process.env.EMAIL_PASSWORD,
+            //pass: "pmjpmxuwqwnbfqsa"
+            // last one new     cigsrttiyzajtzqz with estreamtest
+          },
+        })
+        const mailOptions = {
+          from: process.env.EMAIL,
+          to: email,
+          subject: `Password Reset Request`,
+          text: `
+<!doctype html>
+<html lang="en-US">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <title>Reset Password Email Template</title>
+    <meta name="description" content="Reset Password Email ">
+    <style type="text/css">
+        a:hover {text-decoration: underline !important;}
+    </style>
+</head>
+<body marginheight="0" topmargin="0" marginwidth="0" style="margin: 0px; background-color: #f2f3f8;" leftmargin="0">
+    <!--100% body table-->
+    <table cellspacing="0" border="0" cellpadding="0" width="100%" bgcolor="#f2f3f8"
+        style="@import url(https://fonts.googleapis.com/css?family=Rubik:300,400,500,700|Open+Sans:300,400,600,700); font-family: 'Open Sans', sans-serif;">
+        <tr>
+            <td>
+                <table style="background-color: #f2f3f8; max-width:670px;  margin:0 auto;" width="100%" border="0"
+                    align="center" cellpadding="0" cellspacing="0">
+                    
+                    <tr>
+                        <td>
+                            <table width="95%" border="0" align="center" cellpadding="0" cellspacing="0"
+                                style="max-width:670px;background:#fff; border-radius:3px; text-align:center;-webkit-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06);">
+                                <tr>
+                                    <td style="height:40px;">&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:0 35px;">
+                                        <h1 style="color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;">You have
+                                            requested to reset your password</h1>
+                                        <span
+                                            style="display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;"></span>
+                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+                                            We cannot simply send you your old password. A unique link to reset your
+                                            password has been generated for you. To reset your password, click the
+                                            following link and follow the instructions.
+                                        </p>
+                                        <a href=${link}
+                                            style="background:#20e277;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;">Reset
+                                            Password</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="height:40px;">&nbsp;</td>
+                                </tr>
+                            </table>
+                        </td>
+                   
+                </table>
+            </td>
+        </tr>
+    </table>
+    <!--/100% body table-->
+</body>
+</html>`,
+          html: `
+<!doctype html>
+<html lang="en-US">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <title>Reset Password Email Template</title>
+    <meta name="description" content="Reset Password Email ">
+    <style type="text/css">
+        a:hover {text-decoration: underline !important;}
+    </style>
+</head>
+<body marginheight="0" topmargin="0" marginwidth="0" style="margin: 0px; background-color: #f2f3f8;" leftmargin="0">
+    <!--100% body table-->
+    <table cellspacing="0" border="0" cellpadding="0" width="100%" bgcolor="#f2f3f8"
+        style="@import url(https://fonts.googleapis.com/css?family=Rubik:300,400,500,700|Open+Sans:300,400,600,700); font-family: 'Open Sans', sans-serif;">
+        <tr>
+            <td>
+                <table style="background-color: #f2f3f8; max-width:670px;  margin:0 auto;" width="100%" border="0"
+                    align="center" cellpadding="0" cellspacing="0">
+                   
+                    <tr>
+                        <td>
+                            <table width="95%" border="0" align="center" cellpadding="0" cellspacing="0"
+                                style="max-width:670px;background:#fff; border-radius:3px; text-align:center;-webkit-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06);">
+                                <tr>
+                                    <td style="height:40px;">&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:0 35px;">
+                                        <h1 style="color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;">You have
+                                            requested to reset your password</h1>
+                                        <span
+                                            style="display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;"></span>
+                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+                                            We cannot simply send you your old password. A unique link to reset your
+                                            password has been generated for you. To reset your password, click the
+                                            following link and follow the instructions.
+                                        </p>
+                                        <a href="${link}"
+                                            style="background:#20e277;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;">Reset
+                                            Password</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="height:40px;">&nbsp;</td>
+                                </tr>
+                            </table>
+                        </td>
+                   
+                </table>
+            </td>
+        </tr>
+    </table>
+    <!--/100% body table-->
+</body>
+</html>`,
+        };
+        transport.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            return res.status(400).json({ message: "Error" });
+          }
+          return res.status(200).json({ message: "Email Sent" });
+        });
+      }
+    } else {
+      return res.status(400).json({ message: "email is required" });
+    }
+  } catch {
+    return res.status(400).json({ message: error.message });
+  }
+}
+module.exports.reset_post = async (req, res) => {
+  const newPassword = req.body.newPassword;
+  const confirmPassword = req.body.confirmPassword;
+  const id = req.params.id;
+  const token = req.params.token;
+  console.log(token);
+  const isUser = await User.findById(id);
+  const secretKey = isUser._id + 'net ninja secret ';
+  try {
+    if (newPassword && confirmPassword && id && token) {
+      if (newPassword == confirmPassword) {
+        // token verifiying
+        const isValid = await jwt.verify(token, secretKey)
+        if (isValid) {
+          // crypter mot de passe 
+          const genSalt = await bcrypt.genSalt(10);
+          const hashedPass = await bcrypt.hash(newPassword, genSalt);
+          const isSuccess = await User.findByIdAndUpdate(isUser._id, {
+            $set: {
+              password: hashedPass
+            }
+          });
+          if (isSuccess) {
+            return res.status(200).json({ message: "password reset has successed" });
+          }
+        } else {
+          return res.status(400).json({ message: "Link expired" });
+        }
+      } else {
+        return res.status(400).json({ "message": "Password and confirm password does not match" });
+      }
+    } else {
+      return res.status(400).json({ "message": "All fields are required" });
+    }
+  } catch (error) {
+    return res.status(400).json({ "message": error.message });
+  }
+}
+
+
+User Routes
+
+
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const User = require('../models/user');
+const bodyParser = require('body-parser');
+const jwt = require('jsonwebtoken');
+const bcrypt = require ('bcrypt');
+router.use(bodyParser.json());
+const authController =require('../controllers/authController');
+const passwordController =require('../controllers/passwordController');
+const userController =require('../controllers/userController');
+const { requireAuth } = require('../middleware/authMiddleware');
+const multer = require('multer');
+const nodemailer = require('nodemailer');
+//CRUD user: Modifier ses infos
+//  router.put('/:id', async (req, res) => {
+//    try {
+//      id = req.params.id;
+//      newData = req.body;
+//      updated = await User.findByIdAndUpdate({ _id : id }, newData);
+//    await  updated.save();
+//     res.status(200).send(updated);
+//   } catch (err) {
+//      res.status(400).send(err);
+//    }
+//  });
+//Manage User
+router.delete('/deleteuser',userController.deleteuser);
+router.delete('/:id',userController.deleteuserbyid);
+router.get('/:id',userController.userbyid);
+router.get('/',userController.getallusers);
+router.put('/blockuser/:id',userController.blockuserbyid);
+router.put('/deblockuser/:id',userController.deblockuserbyid);
+router.put('/:id',userController.edituserbyid);
+//PASWORD RESET Routes
+router.post('/forgot-password',passwordController.forgot_post);
+router.get('/forgot-password',passwordController.forgot_get);
+router.post('/reset-password/:id/:token',passwordController.reset_post);
+router.get('/reset-password/:id/:token',passwordController.reset_get);
+//AUTH Routes
+router.get('/sign',authController.signup_get);
+router.post('/sign',authController.signup_post);
+router.get('/login',authController.login_get);
+router.post('/login',authController.login_post);
+router.get('/logout',authController.logout_get);
+router.post('/signupconfirm/:id',authController.signupconfirm_post);
+router.get('/signupconfirm/:id',authController.signupconfirm_get);
+
+//User Controller follow and followers
+ router.patch('/follow/:id', userController.follow);
+ router.patch('/unfollow/:id', userController.unfollow);
+ router.get('/following/:id', userController.following);
+ router.get('/followers/:id', userController.followers);
+ router.get('/mytournaments/:id', userController.tournaments_participated);
+// Add photo de profile
+filename = '';
+
+const mystorage = multer.diskStorage({
+  destination: './uploads/user', //'./uploads/user'
+  filename: (req, file, callback) => {
+    // generate a unique filename based on the current time
+    let date = Date.now();
+    let f1 = date + '.' + file.mimetype.split('/')[1];
+    filename = f1;
+    callback(null, f1);
+  }
+});
+
+const upload = multer({storage: mystorage});
+
+router.post('/addprofilephoto', upload.single('photo'), async (req, res) => {
+  try {
+    const id = req.body.id;
+    const updatedUser = await User.findByIdAndUpdate(id, {photo: filename}, {new: true});
+    filename = '';
+    res.status(201).json(updatedUser);
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({error: err.message});
+  }
+});
+
+
+module.exports= router;
+
+
+
+
+
+Componement Forgotpass
+.js
+
+
+import * as React from 'react';
+import '../Forgotpass/Forgotpass.css';
+import axios from 'axios';
+import Stack from '@mui/material/Stack';
+import MuiAlert from '@mui/material/Alert';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
+import { useNavigate, Link } from 'react-router-dom';
+import {
+    Grid, CssBaseline, Button
+} from '@material-ui/core';
+import { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
+
+function Forgotpass() {
+    /*****alert mui*****/
+    const Alert = React.forwardRef(function Alert(props, ref) {
+        return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+    });
+    /*****alert mui*****/
+    const navigate = useNavigate();
+    const [errorMessage, setErrorMessage] = useState(null);
+    const [isSubmit, setIsSubmit] = useState(false);
+    const [formErrors, setFormErrors] = useState({});
+    const [values, setValues] = React.useState({
+        email: "",
+    });
+    const validateForm = (values) => {
+        const error = {};
+        const gmail = /^[^\s+@]+@[^\s@]+\.[^\s@]{2,}$/i;
+
+        if (!values.email) {
+            error.email = "Email is required";
+        } else if (!gmail.test(values.email)) {
+            error.email = "Format not valid!";
+        }
+        return error;
+    };
+
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setValues({
+            ...values,
+            [name]: value,
+        });
+    };
+    const isValid = () => {
+        if (values.email === "") {
+            return false;
+        }
+        return true;
+    };
+    const handleclick = (e) => {
+        e.preventDefault();
+        setFormErrors(validateForm(values));
+        setIsSubmit(true);
+    };
+
+    /***envoi des données par axios ***/
+    useEffect(() => {
+        if (Object.keys(formErrors).length === 0 && isSubmit) {
+            const post = {
+                email: values.email,
+            };
+            console.log(post);
+            axios.post("http://127.0.0.1:5000/user/forgot-password", post)
+                .then((response) => {
+                    if (response.status === 200)
+                    console.log("user found");
+                    navigate("/user/reset-password", { replace: true });
+                    Swal.fire({
+                        title: "email sended successfully",
+                        icon: "success",
+                        showCancelButton: false
+                    });
+                })
+                .catch((error) => {
+                    console.log("user not found");
+                });
+        }
+    }, [formErrors]);
+
+
+    return (
+        <Grid
+            container
+            spacing={0}
+            direction="column"
+            alignItems="center"
+            justifyContent="center"
+            style={{ minHeight: "100vh", backgroundColor: "#161616" }}
+        >
+            <CssBaseline />
+            <Grid container direction="column" spacing={2} sx={{ width: '50%' }}>
+                <Grid item >
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: 'center' }}>
+                        <h1
+                            style={{
+                                margin: 0,
+                                color: "#FFFFFF",
+                                fontFamily: "Mulish, sans-serif",
+                                fontWeight: 200,
+                                fontSize: 60,
+                                marginBottom: 80,
+                                letterSpacing: "2px"
+
+                            }}
+                        >
+                            Email Validation
+
+                        </h1>
+                    </div>
+                </Grid>
+            </Grid>
+            {/*****************formulaire****************/}
+
+            <FormControl required sx={{ m: 1, width: '52ch' }} variant="outlined">
+                <InputLabel htmlFor="email" >Email</InputLabel>
+                <OutlinedInput
+                    name="email"
+                    onChange={handleChange}
+                    value={values.email}
+                    id="email"
+                    label="Email"
+                    sx={{
+                        '& fieldset': {
+                            borderColor: '#FFFFFF80',
+                        },
+                    }}
+                    style={{ color: '#ffffff' }}
+                />
+                <Stack spacing={2} sx={{ width: '100%' }}>
+                    {formErrors.email && (
+                        <Alert severity="error">{formErrors.email}</Alert>
+                    )}
+                </Stack>
+
+            </FormControl>
+
+            {/* reload page   */}
+            <FormControl sx={{ width: '52ch' }}>
+                <Link style={{ textDecoration: "none", color: "#343beb", }} to={'/user/forgot-password'}
+                    onClick={() => window.location.reload()}>
+                    Didn't receive an email ?</Link>
+            </FormControl>
+
+
+            <div onClick={handleclick}>
+                <Button disabled={isValid() ? false : true}
+                    name='button' type='submit'
+                    style={{
+                        backgroundColor: '#343beb',
+                        borderRadius: "50px",
+                        letterSpacing: "3px",
+                        marginTop: '50px',
+                        width: "200px",
+                    }}
+                    onClick={handleclick}
+                >
+                    Send
+                </Button>
+            </div>
+
+        </Grid>
+
+
+
+    );
+}
+export default Forgotpass;
+
+
+
+
+Forgotpass .css
+
+
+
+label[for="firstname"] {
+    color: rgb(159, 156, 156);
+  }
+label[for="lastname"] {
+    color: rgb(159, 156, 156);
+  }
+  label[for="email"] {
+    color: rgb(159, 156, 156);
+  }
+label[for="password"] {
+    color: rgb(159, 156, 156);
+  }
+label[for="confirmpassword"] {
+    color: rgb(159, 156, 156);
+  }
+
+
+
+
+
+
+Reset pass .js
+
+
+
+
+
+import * as React from 'react';
+import '../Resetpass/Resetpass.css'
+import axios from 'axios';
+import Stack from '@mui/material/Stack';
+import MuiAlert from '@mui/material/Alert';
+import IconButton from '@mui/material/IconButton';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import InputLabel from '@mui/material/InputLabel';
+import InputAdornment from '@mui/material/InputAdornment';
+import FormControl from '@mui/material/FormControl';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { useNavigate, NavLink, useParams } from 'react-router-dom';
+import {
+    Grid, CssBaseline, Button
+} from '@material-ui/core';
+import { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
+
+function Resetpass() {
+    /*****alert mui*****/
+    const Alert = React.forwardRef(function Alert(props, ref) {
+        return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+    });
+    /*****alert mui*****/
+    const navigate = useNavigate();
+    const [Date, setDate] = useState("");
+    const [errorMessage, setErrorMessage] = useState(null);
+    const [isSubmit, setIsSubmit] = useState(false);
+    const [formErrors, setFormErrors] = useState({});
+    const [values, setValues] = React.useState({
+        password: "",
+    });
+    const validateForm = (values) => {
+        const error = {};
+
+        if (!values.password) {
+            error.password = "Password is required";
+        } else if (values.password.length < 6) {
+            error.password = "Password must be at least 6 characters";
+        } else if (!/^[A-Z]/.test(values.password)) {
+            error.password = "Password must start with a capital letter";
+        } else if (!/\d/.test(values.password)) {
+            error.password = "Password must contain at least one number";
+        }
+
+        if (!values.confirmpassword) {
+            error.confirmpassword = "Confirm Password is required";
+        } else if (values.confirmpassword !== values.password) {
+            error.confirmpassword = "Confirm password and password should be same";
+        }
+
+        return error;
+    };
+
+    const [showPassword, setShowPassword] = React.useState(false);
+
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault();
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setValues({
+            ...values,
+            [name]: value,
+        });
+    };
+
+    const handleclick = (e) => {
+        e.preventDefault();
+        setFormErrors(validateForm(values));
+        setIsSubmit(true);
+    };
+    /***controle de date***/
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const { expirationDate } = Date;
+            if (expirationDate && new Date() > expirationDate) {
+                clearInterval(interval);
+                setDate({ expired: true });
+            }
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [Date]);
+
+    //recuper les donnes 
+    const { id } = useParams();
+    console.log(id);
+    const { token } = useParams();
+    console.log(token);
+
+
+    /***envoi des données par axios***/
+    useEffect(() => {
+        if (Object.keys(formErrors).length === 0 && isSubmit) {
+            /****GET****/
+            // axios.get("http://localhost:5000/user/reset-password/${id}/${token}")
+            //     .then((res) => {
+            //         const expirationDate = new Date(res.data.expirationDate);
+            //         setDate({ expirationDate });
+
+            //     })
+            //     .catch((err) => {
+            //         console.log(err);
+            //     });
+            /****GET****/
+
+            /**** POST****/
+
+            const post = {
+                newPassword: values.password,
+                confirmPassword: values.confirmpassword,
+            };
+            console.log(post);
+
+            axios.post(`http://localhost:5000/user/reset-password/${id}/${token}`, post)
+                .then((response) => {
+                    Swal.fire({
+                        title: "Password modified successfully",
+                        icon: "success",
+                        showCancelButton: false,
+                        confirmButtonText: "Go login"
+                    });
+                    navigate("/user/login", { replace: true });
+                    console.log("passwort modified");
+                    // alert(response.data.message);
+                    // navigate("/user/login", { replace: true });
+                })
+                .catch((error) => {
+                    Swal.fire({
+                        title: "link expired ",
+                        icon: "error",
+                        confirmButtonText: "Resend",
+                        showCancelButton: false
+                    });
+                    window.location.reload()
+                    console.log("link expired");
+                    console.log(error)
+                    setErrorMessage(error.response.data.message);
+                });
+        }
+        /****POST****/
+
+
+    }, [formErrors]);
+
+
+    return (
+        <Grid
+            container
+            spacing={0}
+            direction="column"
+            alignItems="center"
+            justifyContent="center"
+            style={{ minHeight: "100vh", backgroundColor: "#161616" }}
+        >
+            <CssBaseline />
+            <Grid container direction="column" spacing={2} sx={{ width: '50%' }}>
+                <Grid item >
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: 'center' }}>
+                        <h1
+                            style={{
+                                margin: 0,
+                                color: "#FFFFFF",
+                                fontFamily: "Mulish, sans-serif",
+                                fontWeight: 200,
+                                fontSize: 60,
+                                marginBottom: 80,
+                                letterSpacing: "2px"
+
+                            }}
+                        >
+                            Reset Password
+                        </h1>
+
+                    </div>
+                </Grid>
+            </Grid>
+            {/*****************formulaire****************/}
+            <FormControl required sx={{ m: 1, width: '52ch' }} variant="outlined">
+                <InputLabel htmlFor="password">New password</InputLabel>
+                <OutlinedInput
+                    name="password"
+                    onChange={handleChange}
+                    value={values.password}
+                    id="password"
+                    label="New password"
+                    sx={{
+                        '& fieldset': {
+                            borderColor: '#FFFFFF80',
+                        },
+                    }}
+                    style={{ color: '#ffffff' }}
+
+                    type={showPassword ? 'text' : 'password'}
+                    endAdornment={
+                        <InputAdornment position="end">
+                            <IconButton
+                                style={{ color: "rgb(159, 156, 156)" }}
+                                aria-label="toggle password visibility"
+                                onClick={handleClickShowPassword}
+                                onMouseDown={handleMouseDownPassword}
+                                edge="end"
+                            >
+                                {showPassword ? <Visibility /> : <VisibilityOff />}
+                            </IconButton>
+                        </InputAdornment>
+                    }
+                />
+                <Stack spacing={2} sx={{ width: '100%' }}>
+                    {formErrors.password && (
+                        <Alert severity="error">{formErrors.password}</Alert>
+                    )}
+                </Stack>
+            </FormControl>
+
+            <FormControl required sx={{ m: 1, width: '52ch' }} variant="outlined">
+                <InputLabel htmlFor="confirmpassword">Confirm new password</InputLabel>
+                <OutlinedInput
+                    name="confirmpassword"
+                    onChange={handleChange}
+                    value={values.confirmpassword}
+                    id="confirmpassword"
+                    label="Confirm new password"
+                    sx={{
+                        '& fieldset': {
+                            borderColor: '#FFFFFF80',
+                        },
+
+                    }}
+                    style={{ color: '#ffffff' }}
+
+                    type={showPassword ? 'text' : 'password'}
+                    endAdornment={
+                        <InputAdornment position="end">
+                            <IconButton
+                                style={{ color: "rgb(159, 156, 156)" }}
+                                aria-label="toggle password visibility"
+                                onClick={handleClickShowPassword}
+                                onMouseDown={handleMouseDownPassword}
+                                edge="end"
+                            >
+                                {showPassword ? <Visibility /> : <VisibilityOff />}
+                            </IconButton>
+                        </InputAdornment>
+                    }
+                />
+                <Stack spacing={2} sx={{ width: '100%' }}>
+                    {formErrors.confirmpassword && (
+                        <Alert severity="error">{formErrors.confirmpassword}</Alert>
+                    )}
+                </Stack>
+            </FormControl>
+            {/* <FormControl sx={{ width: '52ch' }}>
+                <p style={{ color: '#343beb', margin: '0', fontSize: 13 }}>
+                    The email has been sent successfully and will be valid until {Date.expirationDate}
+                </p>
+            </FormControl> */}
+            <div onClick={handleclick}>
+                <Button
+                    name='button' type='submit'
+                    style={{
+                        backgroundColor: '#343beb',
+                        borderRadius: "50px",
+                        letterSpacing: "3px",
+                        marginTop: '50px',
+                        width: "200px",
+                    }}
+                    onClick={handleclick}
+                >
+                    Reset Password
+                </Button>
+            </div>
+
+        </Grid>
+
+
+
+    );
+}
+export default Resetpass;
+
+
+
+Resetpass.css
+
+
+
+label[for="firstname"] {
+    color: rgb(159, 156, 156);
+  }
+label[for="lastname"] {
+    color: rgb(159, 156, 156);
+  }
+  label[for="email"] {
+    color: rgb(159, 156, 156);
+  }
+label[for="password"] {
+    color: rgb(159, 156, 156);
+  }
+label[for="confirmpassword"] {
+    color: rgb(159, 156, 156);
+  }
+
